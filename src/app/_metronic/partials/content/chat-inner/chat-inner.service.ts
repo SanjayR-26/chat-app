@@ -46,6 +46,10 @@ export class ChatInnerService {
     return this.http.get(this.apiUrl + `session/${sessionDet?.session_id}/messages`);
   }
 
+  getChathistoryMsg(sessionId: number) {
+    return this.http.get(this.apiUrl + `session/${sessionId}/messages`);
+  }
+
   createNewChatSession(clientId: number) {
     const postData = {
       ClientId: clientId
@@ -59,6 +63,10 @@ export class ChatInnerService {
 
   closeChatSession(sessionToken: string) {
     return this.http.delete(this.apiUrl + `sessions/${sessionToken}/close`);
+  }
+
+  getChatHistory(clientId: number) {
+    return this.http.get(this.apiUrl + `client/${clientId}/sessions`);
   }
 
   timeAgo(timestamp: string): string {

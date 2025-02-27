@@ -30,7 +30,11 @@ export class ChatInnerComponent implements OnInit {
     nickname: 'John'
   }
   chatMsgList = signal<any>([]);
+  chatHistory = signal<any>([]);
   chatInnerService = inject(ChatInnerService);
+  showLoading = signal<boolean>(true);
+  submitMsgDisable = signal<boolean>(false);
+  submitMsgText = signal<string>('Send');
 
   @Input() isDrawer: boolean = false;
   @HostBinding('class') class = 'card-body';
@@ -51,39 +55,10 @@ export class ChatInnerComponent implements OnInit {
 
   ngOnInit(): void {
     this.createChatSession();
+    this.getChatHistory();
   }
 
   createChatSession() {
-    /* this.chatInnerService.getClientChatActiveSession(this.clientDet.clientId)
-      .pipe(
-        switchMap(res =>
-          iif(
-            () => res && res.length > 0, this.chatInnerService.getClientChatMsg(res[0]), this.chatInnerService.createNewChatSession(this.clientDet.clientId)
-          )
-        )
-      )
-      .subscribe(
-        res => {
-          this.chatInnerService.setClientMsg(res);
-          this.getClientMsg(res);
-        },
-        error => {
-          this.createChatSession();
-          console.log(error);
-        }); */
-
-
-    /* this.chatInnerService.getClientChatActiveSession(this.clientDet.clientId)
-      .subscribe(res => {
-        console.log(res);
-        if ((res && res.length > 0) && !res[0].in_memory) {
-          this.chatInnerService.closeChatSession(res[0].session_token).subscribe(closeSesRes => {
-            console.log('closeSesRes', closeSesRes);
-
-          })
-        }
-      }) */
-
     this.chatInnerService.getClientChatActiveSession(this.clientDet.clientId)
       .pipe(
         switchMap(activeChatSession => {
@@ -111,6 +86,7 @@ export class ChatInnerComponent implements OnInit {
         response => {
           console.log('Chat flow completed:', response);
           this.getClientMsg(response);
+          this.showLoading.set(false);
         },
         error => console.log('Error in chat flow:', error)
       );
@@ -129,6 +105,8 @@ export class ChatInnerComponent implements OnInit {
   }
 
   submitMessage(): void {
+    this.submitMsgDisable.set(true);
+    this.submitMsgText.set('Please Wait...');
     const text = this.messageInput.nativeElement.value.trim();
     const newMessage: any = {
       ClientId: this.clientDet.clientId,
@@ -136,12 +114,11 @@ export class ChatInnerComponent implements OnInit {
       Message: text,
       SessionToken: this.chatInnerService.clientSessionDetArr().session_token
     };
-
-
-
     this.chatInnerService.postChat(newMessage).subscribe(res => {
       this.addChatMsg(res);
       this.messageInput.nativeElement.value = '';
+      this.submitMsgDisable.set(false);
+      this.submitMsgText.set('Send');
     });
   }
 
@@ -190,6 +167,31 @@ export class ChatInnerComponent implements OnInit {
   getMessageCssClass(message: MessageModel): string {
     return `p-5 rounded text-gray-900 fw-bold mw-lg-400px bg-light-${message.type === 'in' ? 'info' : 'primary'
       } text-${message.type === 'in' ? 'start' : 'end'}`;
+  }
+
+  getChatHistory() {
+    this.showLoading.set(true);
+    let chatHisArr: any = [];
+    this.chatInnerService.getChatHistory(this.clientDet.clientId)
+      .subscribe(res => {
+        chatHisArr = res;
+        chatHisArr.filter((val: any) => {
+          const date = new Date(val.CreatedAt);
+          val.CreatedAt = date.toLocaleString();
+        }).reverse().pop();
+        console.log('chatHisArr', chatHisArr);
+        this.chatHistory.set(chatHisArr);
+        this.showLoading.set(false);
+      });
+  }
+
+  loadChatHisMsg(sessionId: number) {
+    this.chatInnerService.getChathistoryMsg(sessionId)
+      .subscribe(res => {
+        console.log(res);
+        this.getClientMsg(res);
+      },
+        error => console.log('Something went wrong - ' + error.message))
   }
 
 

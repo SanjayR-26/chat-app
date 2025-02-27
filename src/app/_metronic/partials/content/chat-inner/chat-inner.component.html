@@ -1,4 +1,5 @@
 <div
+  *ngIf="!showLoading()"
   class="scroll-y me-n5 pe-5"
   [ngClass]="!isDrawer ? 'h-300px h-lg-auto' : ''"
   data-kt-element="messages"
@@ -17,6 +18,15 @@
   "
   [attr.data-kt-scroll-offset]="isDrawer ? '0px' : '-2px'"
 >
+  <div class="d-flex flex-column align-items-center gap-2">
+    <h3>Chat History</h3>
+    <ng-container *ngFor="let val of chatHistory()">
+      <div (click)="loadChatHisMsg(val.Id)" class="cursor-pointer">
+        Load Chat Session {{ val.CreatedAt }}
+      </div>
+    </ng-container>
+  </div>
+
   <ng-container *ngFor="let message of chatMsgList()">
     <div
       [ngClass]="{
@@ -40,7 +50,7 @@
                 href="#"
                 class="fs-5 fw-bolder text-gray-900 text-hover-primary ms-1"
               >
-                {{ clientDet.name }}
+                User
               </a>
             </div>
             <div class="symbol symbol-35px symbol-circle">
@@ -62,7 +72,7 @@
                 href="#"
                 class="fs-5 fw-bolder text-gray-900 text-hover-primary me-1"
               >
-                AI
+                Wealth Director AI
               </a>
               <span class="text-muted fs-7 mb-1">{{ message.time }}</span>
             </div>
@@ -98,25 +108,36 @@
       <button
         class="btn btn-sm btn-icon btn-active-light-primary me-1"
         type="button"
+        [disabled]="true"
         ngbTooltip="Coming soon"
       >
         <i class="bi bi-paperclip fs-3"></i>
-      </button>
-      <button
-        class="btn btn-sm btn-icon btn-active-light-primary me-1"
-        type="button"
-        ngbTooltip="Coming soon"
-      >
-        <i class="bi bi-upload fs-3"></i>
       </button>
     </div>
     <button
       class="btn btn-primary"
       type="button"
       data-kt-element="send"
+      [disabled]="submitMsgDisable()"
       (click)="submitMessage()"
     >
-      Send
+      {{ submitMsgText() }}
     </button>
   </div>
+</div>
+
+<div
+  *ngIf="showLoading()"
+  style="
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    opacity: 0.5;
+    top: 0px;
+    display: flex;
+    align-items: center;
+  "
+>
+  <h1 style="color: white; text-align: center; width: 50%">Loading...</h1>
 </div>
