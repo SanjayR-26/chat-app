@@ -1,14 +1,16 @@
 import {
   Component,
+  computed,
   ElementRef,
   HostBinding,
   inject,
   Input,
+  OnChanges,
   OnInit,
   signal,
   ViewChild,
 } from '@angular/core';
-import { BehaviorSubject, iif, Observable, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, iif, Observable, retry, switchMap, tap } from 'rxjs';
 import {
   defaultMessages,
   defaultUserInfos,
@@ -22,7 +24,7 @@ import { ChatInnerService } from './chat-inner.service';
   selector: 'app-chat-inner',
   templateUrl: './chat-inner.component.html',
 })
-export class ChatInnerComponent implements OnInit {
+export class ChatInnerComponent implements OnInit, OnChanges {
 
   clientDet: any = { // Todo: Need to update with dynamic data
     clientId: 1,
@@ -35,14 +37,19 @@ export class ChatInnerComponent implements OnInit {
   showLoading = signal<boolean>(true);
   submitMsgDisable = signal<boolean>(false);
   submitMsgText = signal<string>('Send');
+  showChatTxtArea = signal<boolean>(true);
+  private _textareaValue = signal<string>('');
+  textareaValue: any = computed(() => this._textareaValue());
 
   @Input() isDrawer: boolean = false;
+  @Input() showChatHistory: boolean = false;
   @HostBinding('class') class = 'card-body';
   @HostBinding('id') id = this.isDrawer
     ? 'kt_drawer_chat_messenger_body'
     : 'kt_chat_messenger_body';
-  @ViewChild('messageInput', { static: true })
-  messageInput: ElementRef<HTMLTextAreaElement>;
+  // @ViewChild('messageInput', { static: true })
+  // messageInput: ElementRef<HTMLTextAreaElement>;
+  messageInput: string = '';
 
   private messages$: BehaviorSubject<Array<MessageModel>> = new BehaviorSubject<
     Array<MessageModel>
@@ -58,19 +65,23 @@ export class ChatInnerComponent implements OnInit {
     this.getChatHistory();
   }
 
-  createChatSession() {
+  ngOnChanges(changes: any) {
+    if (changes['showChatHistory']) {
+      if (!this.showChatHistory) {
+        this.chatMsgList.set([]);
+      }
+    }
+  }
+
+  createChatSession(retry?: boolean) {
     this.chatInnerService.getClientChatActiveSession(this.clientDet.clientId)
       .pipe(
         switchMap(activeChatSession => {
           if (!activeChatSession.length) {
             return this.chatInnerService.createNewChatSession(this.clientDet.clientId)
-          } else if ((activeChatSession && activeChatSession.length > 0) && !activeChatSession[0].in_memory) {
-            // If inMemory is false, close the chat first
-            return this.chatInnerService.closeChatSession(activeChatSession[0].session_token).pipe(
-              tap(() => console.log('Chat closed')),
-              switchMap(() => this.chatInnerService.createNewChatSession(this.clientDet.clientId)), // Then create a new chat
-              tap(() => console.log('Chat created'))
-            );
+          } else if ((activeChatSession && activeChatSession.length > 0) && !activeChatSession[0].existing) {
+            // If existing is false, create new chat
+            return this.chatInnerService.createNewChatSession(this.clientDet.clientId);
           }
           else {
             // If inMemory is true, return response
@@ -86,6 +97,9 @@ export class ChatInnerComponent implements OnInit {
         response => {
           console.log('Chat flow completed:', response);
           this.getClientMsg(response);
+          if (retry) {
+            this.submitMessage();
+          }
           this.showLoading.set(false);
         },
         error => console.log('Error in chat flow:', error)
@@ -107,19 +121,32 @@ export class ChatInnerComponent implements OnInit {
   submitMessage(): void {
     this.submitMsgDisable.set(true);
     this.submitMsgText.set('Please Wait...');
-    const text = this.messageInput.nativeElement.value.trim();
+    const text = this.messageInput.trim();
     const newMessage: any = {
       ClientId: this.clientDet.clientId,
       SessionId: this.chatInnerService.clientSessionDetArr().session_id,
       Message: text,
       SessionToken: this.chatInnerService.clientSessionDetArr().session_token
     };
-    this.chatInnerService.postChat(newMessage).subscribe(res => {
-      this.addChatMsg(res);
-      this.messageInput.nativeElement.value = '';
-      this.submitMsgDisable.set(false);
-      this.submitMsgText.set('Send');
-    });
+    this.chatInnerService.postChat(newMessage)
+      .subscribe(res => {
+        this.addChatMsg(res);
+        this.messageInput = '';
+        this.submitMsgDisable.set(false);
+        this.submitMsgText.set('Send');
+      },
+        (error) => {
+          console.log('Error occurred', error);
+          // this.retryErrMsg(newMessage);
+          this.createChatSession(true);
+        });
+  }
+
+  retryErrMsg(msgdata: any) {
+    this.chatInnerService.createNewChatSession(this.clientDet.clientId).
+      subscribe((res) => {
+        console.log('retry res', res);
+      })
   }
 
   addChatMsg(chatRes: any) {

@@ -18,6 +18,8 @@
   "
   [attr.data-kt-scroll-offset]="isDrawer ? '0px' : '-2px'"
 >
+  this.isOpen - {{ this.showChatHistory }}
+  @if(this.showChatHistory){
   <div class="d-flex flex-column align-items-center gap-2">
     <h3>Chat History</h3>
     <ng-container *ngFor="let val of chatHistory()">
@@ -26,6 +28,7 @@
       </div>
     </ng-container>
   </div>
+  }
 
   <ng-container *ngFor="let message of chatMsgList()">
     <div
@@ -89,6 +92,7 @@
   </ng-container>
 </div>
 
+@if(!this.showChatHistory){
 <div
   class="card-footer pt-4"
   [id]="
@@ -96,11 +100,11 @@
   "
 >
   <textarea
-    #messageInput
     class="form-control form-control-flush mb-3"
     rows="1"
     data-kt-element="input"
     placeholder="Type a message"
+    [(ngModel)]="messageInput"
   ></textarea>
 
   <div class="d-flex flex-stack">
@@ -125,6 +129,7 @@
     </button>
   </div>
 </div>
+}
 
 <div
   *ngIf="showLoading()"

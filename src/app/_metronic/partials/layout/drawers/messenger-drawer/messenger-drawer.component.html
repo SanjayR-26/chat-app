@@ -17,7 +17,7 @@
         <div class="d-flex justify-content-center flex-column me-3">
           <a
             class="fs-4 fw-bolder text-gray-900 text-hover-primary me-1 mb-2 lh-1 cursor-pointer"
-            >Brian Cox</a
+            >Wealth Director AI</a
           >
           <div class="mb-0 lh-1">
             <span
@@ -34,8 +34,9 @@
             data-kt-menu-trigger="click"
             data-kt-menu-placement="bottom-end"
             data-kt-menu-flip="top-end"
+            (click)="toggleChatHistroy()"
           >
-            <i class="bi bi-three-dots fs-3"></i>
+            <i class="bi bi-clock-history fs-3"></i>
           </button>
         </div>
         <div
@@ -50,6 +51,9 @@
         </div>
       </div>
     </div>
-    <app-chat-inner [isDrawer]="true"></app-chat-inner>
+    <app-chat-inner
+      [isDrawer]="true"
+      [showChatHistory]="showChatHistory()"
+    ></app-chat-inner>
   </div>
 </div>
