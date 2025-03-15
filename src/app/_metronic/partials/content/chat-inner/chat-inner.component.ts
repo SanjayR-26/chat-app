@@ -192,7 +192,7 @@ export class ChatInnerComponent implements OnInit, OnChanges {
   }
 
   getMessageCssClass(message: MessageModel): string {
-    return `p-5 rounded text-gray-900 fw-bold mw-lg-400px bg-light-${message.type === 'in' ? 'info' : 'primary'
+    return `p-5 rounded kt_drawer_chatbg bg-light-${message.type === 'in' ? 'infoinfochat' : 'primary'
       } text-${message.type === 'in' ? 'start' : 'end'}`;
   }
 
