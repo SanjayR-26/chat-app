@@ -8842,14 +8842,43 @@
 }
 
 #kt_drawer_chat .kt_drawer_chat_message {
-  max-height: 100%;
+  max-height: calc(80vh - 160px);
+  overflow-y: auto;
+  min-height: 300px;
 }
 
 #kt_drawer_chat_messenger_footer {
-  position: fixed;
-  bottom: 10%;
-  width: 470px;
+  position: relative;
+  width: 100%;
   background-color: white;
+  border-top: 1px solid #f0f2f5;
+  padding: 1rem;
+  bottom: 0;
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.input-area {
+  position: relative;
+  width: 100%;
+  background-color: white;
+  padding: 1rem;
+  border-top: 1px solid #f0f2f5;
+}
+
+.input-area textarea {
+  width: 100%;
+  resize: none;
+}
+
+.message-area {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 20px;
 }
 
 .kt_drawer_chat_btnicon {
