@@ -270,29 +270,8 @@ export class ChatInnerComponent implements OnInit, OnChanges {
 
   // Test the message formatting function with sample data
   testFormatting(): void {
-    const testMessage = JSON.stringify({
-      "Message": "The Wealth Director platform is a comprehensive financial management tool designed to help users understand and improve their financial health. It offers clear insights, easy tracking, and personalized advice. The platform is suitable for new users (prospects), paying clients, and financial advisors.\n\n**Key Features & Benefits:**\n- **For Prospects (New Users):**\n  - General Information Entry: Quickly provide basic details to get started.\n  - Goal & Portfolio Overview: Set financial goals and get a snapshot of your current assets.\n  - Financial & Life Event Tracking: Track important financial milestones and life events.\n  - Benefit: Easy and risk-free way to see how the platform can help improve your financial health.\n\n- **For Clients (Paying Users):**\n  - Detailed Financial Data Entry: Enter comprehensive details about income, spending, assets, and debts.\n  - Detailed Reports: Cover spending, income, portfolio performance, and goal progress.\n  - Benefit: Stay updated on your financial status without extra effort.\n\n**Unique Selling Points (USPs):**\n- All-in-One Financial Management: Combine tracking of spending, income, portfolio, and life events in a single, easy-to-use platform.\n- Personalized Dashboards & Reports: Get tailored financial insights and reports that are easy to understand.\n- Expert Financial Advice: Benefit from professional insights through financial advisors who use the platform to offer personalized advice.\n- User-Friendly Interface: Simple design that works well for both new users and experienced clients.\n\n**Use Cases:**\n- **For a New User (Prospect):** Quickly enter basic information, set financial goals, and start tracking spending and income.\n- **For a Paying Client:** Access a personalized dashboard with a clear view of financial score, income, spending, and progress towards life goals.\n- **For a Financial Advisor:** Analyze client data and provide expert advice."
-    });
-    
-    console.log('Original Message:', JSON.parse(testMessage).Message);
-    console.log('Formatted Message:', this.chatInnerService.formatMessageContent(testMessage));
-    
-    // Add a test message to the chat list for visual confirmation
-    if (this.chatMsgList().length === 0) {
-      const testAiMsg = {
-        Id: '999',
-        SessionId: '1',
-        ClientId: this.clientDet.clientId,
-        Message: this.chatInnerService.formatMessageContent(testMessage),
-        MessageType: "AI",
-        CreatedAt: new Date().toISOString(),
-        time: 'just now',
-        type: "in",
-        user: this.clientDet.clientId,
-        avatar: "300-25.jpg"
-      };
-      this.chatMsgList.update(val => [...val, testAiMsg]);
-    }
+    // Remove test message functionality
+    console.log('Format testing disabled');
   }
 
   // Update the method to not require an event parameter
